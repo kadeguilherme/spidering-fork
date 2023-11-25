@@ -54,8 +54,8 @@ int main() {
     // Percorrer as correspondências e imprimir os valores de href
     for (; it != end; ++it) {
         std::smatch match = *it;
-        #std::cout << "Href encontrado: " << match[1].str() << std::endl;
-        my_link.insert(std::make_pair( match[1].str() << std::endl ,match[1].str() << std::endl)
+        //std::cout << "Href encontrado: " << match[1].str() << std::endl;
+        my_link.insert(std::make_pair( match[1].str() ,match[1].str())
     }
 
 
