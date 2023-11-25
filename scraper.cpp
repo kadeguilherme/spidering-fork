@@ -43,7 +43,7 @@ std::string GetHtmlFromUrl(const std::string& url) {
 }
 
 int main() {
-    std::string url = "https://www.ifb.edu.br/";
+    std::string url = "https://www.ifb.edu.br/index.php";
     std::string html = GetHtmlFromUrl(url);
     std::regex hrefRegex("href=\"([^\"]*ifb[^\"]*)\"");
     std::regex pdfRegex("[^.]*.pdf");
