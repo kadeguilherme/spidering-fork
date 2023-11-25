@@ -24,7 +24,6 @@ std::string GetHtmlFromUrl(const std::string& url) {
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &result);
 
-        // Desabilitar a verificação do certificado SSL (use isso com cuidado)
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 
         res = curl_easy_perform(curl);
@@ -46,29 +45,43 @@ std::string GetHtmlFromUrl(const std::string& url) {
 int main() {
     std::string url = "https://www.ifb.edu.br/";
     std::string html = GetHtmlFromUrl(url);
-
-    // Regex para encontrar URLs com "ifb" e links que terminam com ".pdf"
-    std::regex hrefRegex("href=\"([^\"]*ifb[^\"]*)\"|[^.]*.pdf");
-
-    std::map<std::string, std::string> my_links;
+    std::regex hrefRegex("href=\"([^\"]*ifb[^\"]*)\"");
+    std::regex pdfRegex("[^.]*.pdf");
+    std::map<std::string,std::string> my_link;
 
     auto it = std::sregex_iterator(html.begin(), html.end(), hrefRegex);
     auto end = std::sregex_iterator();
 
-    // Percorrer as correspondências e adicionar ao mapa
+    
+    
+    // Percorrer as correspondências e imprimir os valores de href
     for (; it != end; ++it) {
         std::smatch match = *it;
+        //std::cout << "Href encontrado: " << match[1].str() << std::endl;
         for (int i = 1; i < match.size(); i++) {
             if (!match[i].str().empty()) {
-                my_links.insert(std::make_pair(match[i].str(), match[i].str()));
+                my_link.insert(std::make_pair(match[i].str(), match[i].str()));
             }
         }
     }
 
-    // Imprimir os links
-    for (const auto& link : my_links) {
-        std::cout << "Link encontrado: " << link.first << std::endl;
+    auto links = std::sregex_iterator(html.begin(), html.end(), pdfRegex);
+    auto linksend = std::sregex_iterator();
+
+    for (; links != linksend; ++it) {
+        std::smatch match = *links;
+        //std::cout << "Href encontrado: " << match[1].str() << std::endl;
+        for (int i = 1; i < match.size(); i++) {
+            if (!match[i].str().empty()) {
+                my_link.insert(std::make_pair(match[i].str(), match[i].str()));
+            }
+        }
     }
+
+    std::cout << my_link;
+
+    //std::cout << links;
+    
 
     return 0;
 }
