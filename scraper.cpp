@@ -60,7 +60,7 @@ int main() {
         //std::cout << "Href encontrado: " << match[1].str() << std::endl;
         for (int i = 1; i < match.size(); i++) {
             if (!match[i].str().empty()) {
-                my_links.insert(std::make_pair(match[i].str(), match[i].str()));
+                my_link.insert(std::make_pair(match[i].str(), match[i].str()));
             }
         }
     }
