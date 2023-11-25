@@ -49,21 +49,19 @@ int main() {
     std::regex pdfRegex("[^.]*.pdf");
     std::map<std::string,std::string> my_link;
 
-    auto it = std::sregex_iterator(html.begin(), html.end(), hrefRegex);
-    auto end = std::sregex_iterator();
+    // auto it = std::sregex_iterator(html.begin(), html.end(), hrefRegex);
+    // auto end = std::sregex_iterator();
 
-    
-    
     // Percorrer as correspondências e imprimir os valores de href
-    for (; it != end; ++it) {
-        std::smatch match = *it;
-        //std::cout << "Href encontrado: " << match[1].str() << std::endl;
-        for (int i = 1; i < match.size(); i++) {
-            if (!match[i].str().empty()) {
-                my_link.insert(std::make_pair(match[i].str(), match[i].str()));
-            }
-        }
-    }
+    // for (; it != end; ++it) {
+    //     std::smatch match = *it;
+    //     //std::cout << "Href encontrado: " << match[1].str() << std::endl;
+    //     for (int i = 1; i < match.size(); i++) {
+    //         if (!match[i].str().empty()) {
+    //             my_link.insert(std::make_pair(match[i].str(), match[i].str()));
+    //         }
+    //     }
+    // }
 
     auto links = std::sregex_iterator(html.begin(), html.end(), pdfRegex);
     auto linksend = std::sregex_iterator();
