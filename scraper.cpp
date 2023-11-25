@@ -58,6 +58,7 @@ int main() {
         my_link.insert(std::make_pair( match[1].str() ,match[1].str()));
     }
 
+    std::cout << my_link;
 
     return 0;
 }
