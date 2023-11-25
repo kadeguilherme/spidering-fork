@@ -69,7 +69,7 @@ int main() {
     for (; links != linksend; ++links) {
         std::smatch match = *links;
         //std::cout << "Href encontrado: " << match[1].str() << std::endl;
-                my_link.insert(std::make_pair(match[1].str(), match[1].str()));
+        my_link.insert(std::make_pair(match[1].str(), match[1].str()));
     }
 
     std::cout << my_link;
