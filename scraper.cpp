@@ -14,7 +14,6 @@ std::string GetHtmlFromUrl(const std::string& url) {
     CURL* curl;
     CURLcode res;
     std::string result;
-    std::map<char,char> my_link = {};
 
     // Inicializar o libcurl
     curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -47,6 +46,7 @@ int main() {
     std::string url = "https://www.ifb.edu.br/";
     std::string html = GetHtmlFromUrl(url);
     std::regex hrefRegex("href=\"([^\"]*ifb[^\"]*)\"");
+    std::map<std::string,std::string> my_link;
 
     auto it = std::sregex_iterator(html.begin(), html.end(), hrefRegex);
     auto end = std::sregex_iterator();
@@ -54,7 +54,8 @@ int main() {
     // Percorrer as correspondências e imprimir os valores de href
     for (; it != end; ++it) {
         std::smatch match = *it;
-        std::cout << "Href encontrado: " << match[1].str() << std::endl;
+        #std::cout << "Href encontrado: " << match[1].str() << std::endl;
+        my_link.insert(std::make_pair( match[1].str() << std::endl ,match[1].str() << std::endl)
     }
 
 
