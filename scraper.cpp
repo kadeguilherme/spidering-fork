@@ -49,7 +49,7 @@ int main() {
     std::regex link_regex("https://.*\\.pdf");
 
     std::smatch match;
-    std::map<std::string,std::string> my_link;
+    std::map<std::string, std::vector<std::string>> my_link;
 
     auto it = std::sregex_iterator(html.begin(), html.end(), link_regex);
     auto end = std::sregex_iterator();
@@ -60,12 +60,28 @@ int main() {
         //std::cout << it->str() << std::endl;
         //std::cout << "Href encontrado: " << match[1].str() << std::endl;
         //my_link.insert(std::make_pair( match[1].str() ,match[1].str()));
-        my_link[match[1].str()] = "";
+        my_link[match[1].str()] = {};
     }
 
-    for (const auto& pair : my_link){    
-        std::cout << "Chave: " << pair.first << ", Valor: " << pair.second << std::endl;
+    // Adicionar valores às chaves (uma lista de valores)
+    for (auto& pair : my_link) {
+        std::cout << "Digite os valores para " << pair.first << " (digite 'fim' para terminar): ";
+        std::string value;
+        while (std::cin >> value && value != "fim") {
+            pair.second.push_back(value);
+        }
+        std::cin.clear();  // Limpar o estado do fluxo para que a entrada do usuário funcione corretamente
     }
+
+    // Iterar sobre o mapa e imprimir cada par chave-valor
+    for (const auto& pair : my_link) {
+        std::cout << "Chave: " << pair.first << ", Valores: ";
+        for (const auto& value : pair.second) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+    }
+
 
     return 0;
 }
