@@ -45,7 +45,7 @@ std::string GetHtmlFromUrl(const std::string& url) {
 int main() {
     std::string url = "https://www.ifb.edu.br/";
     std::string html = GetHtmlFromUrl(url);
-    std::regex hrefRegex("href=\"([^\"]*ifb[^\"]*)\"");
+    std::regex hrefRegex("href=\"(https[^\"]*ifb\\.edu\\.br[^\"]*)\"");
     std::regex link_regex("https://.*\\.pdf");
 
     std::smatch match;
@@ -56,10 +56,15 @@ int main() {
 
     // Percorrer as correspondências e imprimir os valores de href
     for (; it != end; ++it) {
-        std::smatch match = *it;
-        std::cout << it->str() << std::endl;
-       //std::cout << "Href encontrado: " << match[1].str() << std::endl;
-    //    my_link.insert(std::make_pair( match[1].str() ,match[1].str()));
+         std::smatch match = *it;
+        //std::cout << it->str() << std::endl;
+        //std::cout << "Href encontrado: " << match[1].str() << std::endl;
+        //my_link.insert(std::make_pair( match[1].str() ,match[1].str()));
+        my_link[match[1].str()] = "";
+    }
+
+    for (const auto& pair : my_link){    
+        std::cout << "Chave: " << pair.first << ", Valor: " << pair.second << std::endl;
     }
 
     return 0;
