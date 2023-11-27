@@ -46,19 +46,24 @@ int main() {
     std::string url = "https://www.ifb.edu.br/";
     std::string html = GetHtmlFromUrl(url);
     std::regex hrefRegex("href=\"([^\"]*ifb[^\"]*)\"");
+    std::regex link_regex("https://.*\\.pdf");
+
+    std::smatch match;
     std::map<std::string,std::string> my_link;
 
-    auto it = std::sregex_iterator(html.begin(), html.end(), hrefRegex);
+    auto it = std::sregex_iterator(html.begin(), html.end(), link_regex);
     auto end = std::sregex_iterator();
 
     // Percorrer as correspondências e imprimir os valores de href
-    for (; it != end; ++it) {
-        std::smatch match = *it;
-        //std::cout << "Href encontrado: " << match[1].str() << std::endl;
-        my_link.insert(std::make_pair( match[1].str() ,match[1].str()));
+    //for (; it != end; ++it) {
+    //    std::smatch match = *it;
+       //std::cout << "Href encontrado: " << match[1].str() << std::endl;
+    //    my_link.insert(std::make_pair( match[1].str() ,match[1].str()));
+    //}
+
+    while (it != end){
+        std::cout << it->str() << std::endl;
+        ++it;
     }
-
-    std::cout << my_link;
-
     return 0;
 }
