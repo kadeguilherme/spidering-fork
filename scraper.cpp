@@ -45,17 +45,52 @@ std::string GetHtmlFromUrl(const std::string& url) {
 int main() {
     std::string url = "https://www.ifb.edu.br/";
     std::string html = GetHtmlFromUrl(url);
+<<<<<<< HEAD
     std::regex hrefRegex("href=\"([^\"]*ifb[^\"]*)\"");
     std::map<std::string,std::string> my_link;
+=======
+    std::regex hrefRegex("href=\"(https[^\"]*ifb\\.edu\\.br[^\"]*)\"");
+    std::regex link_regex("https://.*\\.pdf");
+>>>>>>> release
 
-    auto it = std::sregex_iterator(html.begin(), html.end(), hrefRegex);
+    std::smatch match;
+    std::map<std::string, std::vector<std::string>> my_link;
+
+    auto it = std::sregex_iterator(html.begin(), html.end(), link_regex);
     auto end = std::sregex_iterator();
 
     // Percorrer as correspondências e imprimir os valores de href
     for (; it != end; ++it) {
+<<<<<<< HEAD
         std::smatch match = *it;
         //std::cout << "Href encontrado: " << match[1].str() << std::endl;
         my_link.insert(std::make_pair( match[1].str() ,match[1].str()));
+=======
+         std::smatch match = *it;
+        //std::cout << it->str() << std::endl;
+        //std::cout << "Href encontrado: " << match[1].str() << std::endl;
+        //my_link.insert(std::make_pair( match[1].str() ,match[1].str()));
+        my_link[match[1].str()] = {};
+    }
+
+    // Adicionar valores às chaves (uma lista de valores)
+    for (auto& pair : my_link) {
+        std::cout << "Digite os valores para " << pair.first << " (digite 'fim' para terminar): ";
+        std::string value;
+        while (std::cin >> value && value != "fim") {
+            pair.second.push_back(value);
+        }
+        std::cin.clear();  // Limpar o estado do fluxo para que a entrada do usuário funcione corretamente
+    }
+
+    // Iterar sobre o mapa e imprimir cada par chave-valor
+    for (const auto& pair : my_link) {
+        std::cout << "Chave: " << pair.first << ", Valores: ";
+        for (const auto& value : pair.second) {
+            std::cout << value << " ";
+        }
+        std::cout << std::endl;
+>>>>>>> release
     }
 
     for (const auto& link :my_link){
