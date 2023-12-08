@@ -1,12 +1,16 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <curl/curl.h>
 #include <map>
 #include <regex>
+#include <vector>
+#include <thread>
+#include <mutex>
 
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* response) {
     size_t total_size = size * nmemb;
-    response->append((char*)contents, total_size);
+    response->append(static_cast<char*>(contents), total_size);
     return total_size;
 }
 
@@ -15,7 +19,6 @@ std::string GetHtmlFromUrl(const std::string& url) {
     CURLcode res;
     std::string result;
 
-    // Inicializar o libcurl
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
 
@@ -32,55 +35,75 @@ std::string GetHtmlFromUrl(const std::string& url) {
             fprintf(stderr, "Erro ao realizar a solicitação: %s\n", curl_easy_strerror(res));
         }
 
-        // Limpar e liberar recursos
         curl_easy_cleanup(curl);
     }
 
-    // Finalizar o libcurl
     curl_global_cleanup();
 
     return result;
 }
 
+void ProcessUrls(const std::vector<std::string>& urls, std::map<std::string, std::vector<std::string>>& linkMap, std::mutex& mtx) {
+    for (const auto& url : urls) {
+        std::string html = GetHtmlFromUrl(url);
+
+        std::regex hrefRegex("href=\"(https[^\"]*ifg\\.edu\\.br[^\"]*)\"");
+        std::regex link_regex("https://.*\\.pdf");
+
+        std::smatch match;
+        std::vector<std::string> links;
+
+        auto it = std::sregex_iterator(html.begin(), html.end(), hrefRegex);
+        auto end = std::sregex_iterator();
+
+        for (; it != end; ++it) {
+            std::smatch match = *it;
+            links.push_back(match[1].str());
+        }
+
+        std::lock_guard<std::mutex> lock(mtx);
+        linkMap[url] = links;
+    }
+}
+
 int main() {
-    std::string url = "https://www.ifb.edu.br/";
-    std::string html = GetHtmlFromUrl(url);
-    std::regex hrefRegex("href=\"(https[^\"]*ifb\\.edu\\.br[^\"]*)\"");
-    std::regex link_regex("https://.*\\.pdf");
+    std::string base_url = "https://www.ifg.edu.br/";
+    std::vector<std::string> seed_urls = {base_url};
 
-    std::smatch match;
     std::map<std::string, std::vector<std::string>> my_link;
+    std::mutex my_mutex;
 
-    auto it = std::sregex_iterator(html.begin(), html.end(), hrefRegex);
-    auto end = std::sregex_iterator();
-
-    // Percorrer as correspondências e imprimir os valores de href
-    for (; it != end; ++it) {
-         std::smatch match = *it;
-        //std::cout << it->str() << std::endl;
-        //std::cout << "Href encontrado: " << match[1].str() << std::endl;
-        //my_link.insert(std::make_pair( match[1].str() ,match[1].str()));
-        my_link[match[1].str()] = {};
+    std::vector<std::thread> threads;
+    for (int i = 0; i < seed_urls.size(); ++i) {
+        threads.emplace_back(ProcessUrls, std::ref(seed_urls), std::ref(my_link), std::ref(my_mutex));
     }
 
-    // Adicionar valores às chaves (uma lista de valores)
-    for (auto& pair : my_link) {
-        std::cout << "Digite os valores para " << pair.first << " (digite 'fim' para terminar): ";
-        std::string value;
-        while (std::cin >> value && value != "fim") {
-            pair.second.push_back(value);
-        }
-        std::cin.clear();  // Limpar o estado do fluxo para que a entrada do usuário funcione corretamente
+    for (auto& thread : threads) {
+        thread.join();
     }
 
-    // Iterar sobre o mapa e imprimir cada par chave-valor
+    // Abrir um arquivo para escrever os links de PDF
+    std::ofstream outputFile("pdf_links.txt");
+    if (!outputFile.is_open()) {
+        std::cerr << "Erro ao abrir o arquivo para escrita." << std::endl;
+        return 1;
+    }
+
+    // Iterar sobre o mapa e escrever cada link no arquivo
     for (const auto& pair : my_link) {
-        std::cout << "Chave: " << pair.first << ", Valores: ";
-        for (const auto& value : pair.second) {
-            std::cout << value << " ";
+        outputFile << "URL: " << pair.first << "\nLinks encontrados: ";
+        for (const auto& link : pair.second) {
+            outputFile << link << " ";
         }
-        std::cout << std::endl;
+        outputFile << "\n\n";
     }
+
+    // Fechar o arquivo
+    outputFile.close();
+
+    std::cout << "Links salvos em pdf_links.txt" << std::endl;
 
     return 0;
 }
+
+
