@@ -66,7 +66,7 @@ int main() {
         auto pdfsend = std::sregex_iterator();
         for (; pdf != pdfsend; ++pdf) {
                 std::smatch matchpdf = *pdf;
-            my_link.push_back(matchpdf[1].str());
+            my_link.push_back(matchpdf[0].str());
             }
     }
 // Iterar sobre o mapa e imprimir cada par chave-valor
