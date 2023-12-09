@@ -63,18 +63,15 @@ int main() {
         my_link[match[1].str()] = {};
     }
 
-    // Adicionar valores às chaves (uma lista de valores)
+    // Adicionar valores �| s chaves (uma lista de valores)
     for (auto& pair : my_link) {
         std::cout << "Digite os valores para " << pair.first << " (digite 'fim' para terminar): ";
-        auto it = std::sregex_iterator(html.begin(), html.end(), link_regex);
-        auto end = std::sregex_iterator();
-        for (; it != end; ++it) {
-         std::smatch match = *it;
-        //std::cout << it->str() << std::endl;
-        //std::cout << "Href encontrado: " << match[1].str() << std::endl;
-        //my_link.insert(std::make_pair( match[1].str() ,match[1].str()));
-        std::cout << "Chave: " << pair.first << ", Valores: " << match << std::endl;
-        }
+        auto pdf = std::sregex_iterator(html.begin(), html.end(), link_regex);
+        auto pdfsend = std::sregex_iterator();
+            for (; pdf != pdfsend; ++pdf) {
+                std::smatch matchpdf = *pdf;
+                std::cout << "Chave: " << pair.first << ", Valores: " << matchpdf[1].str() << std::endl;
+            }
         std::string value;
         while (std::cin >> value && value != "fim") {
             pair.second.push_back(value);
