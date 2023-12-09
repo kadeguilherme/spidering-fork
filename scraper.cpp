@@ -51,7 +51,7 @@ int main() {
     std::smatch match;
     std::map<std::string, std::vector<std::string>> my_link;
 
-    auto it = std::sregex_iterator(html.begin(), html.end(), link_regex);
+    auto it = std::sregex_iterator(html.begin(), html.end(), hrefRegex);
     auto end = std::sregex_iterator();
 
     // Percorrer as correspondências e imprimir os valores de href
@@ -66,6 +66,15 @@ int main() {
     // Adicionar valores às chaves (uma lista de valores)
     for (auto& pair : my_link) {
         std::cout << "Digite os valores para " << pair.first << " (digite 'fim' para terminar): ";
+        auto it = std::sregex_iterator(html.begin(), html.end(), link_regex);
+        auto end = std::sregex_iterator();
+        for (; it != end; ++it) {
+         std::smatch match = *it;
+        //std::cout << it->str() << std::endl;
+        //std::cout << "Href encontrado: " << match[1].str() << std::endl;
+        //my_link.insert(std::make_pair( match[1].str() ,match[1].str()));
+        std::cout << "Chave: " << pair.first << ", Valores: " << match << std::endl;
+        }
         std::string value;
         while (std::cin >> value && value != "fim") {
             pair.second.push_back(value);
@@ -81,7 +90,6 @@ int main() {
         }
         std::cout << std::endl;
     }
-
 
     return 0;
 }
