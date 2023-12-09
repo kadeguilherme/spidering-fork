@@ -57,7 +57,7 @@ int main() {
   // Adicionar os links
     for (; it != end; ++it) {
          std::smatch match = *it;
-        my_link.push_back(match[1].str());
+        my_link.push_back(match.str());
     }
 
   // Adicionar os PDFS 
@@ -66,7 +66,7 @@ int main() {
         auto pdfsend = std::sregex_iterator();
         for (; pdf != pdfsend; ++pdf) {
                 std::smatch matchpdf = *pdf;
-            my_link.push_back(matchpdf[0].str());
+            my_link.push_back(matchpdf.str());
             }
     }
 // Iterar sobre o mapa e imprimir cada par chave-valor
