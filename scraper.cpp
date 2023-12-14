@@ -3,6 +3,8 @@
 #include <curl/curl.h>
 #include <map>
 #include <regex>
+#include <pthread.h>
+
 
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* response) {
     size_t total_size = size * nmemb;
@@ -41,15 +43,17 @@ std::string GetHtmlFromUrl(const std::string& url) {
 
     return result;
 }
-
 int main() {
+
     std::string url = "https://www.ifb.edu.br/";
     std::string html = GetHtmlFromUrl(url);
     std::regex hrefRegex("href=\"(https[^\"]*ifb\\.edu\\.br[^\"]*)\"");
     std::regex link_regex("https://.*\\.pdf");
 
     std::smatch match;
+    std::smatch matchpdf;
     std::vector<std::string> my_link;
+    std::vector<std::string> my_pdf;
 
     auto it = std::sregex_iterator(html.begin(), html.end(), hrefRegex);
     auto end = std::sregex_iterator();
@@ -65,14 +69,18 @@ int main() {
         auto pdf = std::sregex_iterator(html.begin(), html.end(), link_regex);
         auto pdfsend = std::sregex_iterator();
         for (; pdf != pdfsend; ++pdf) {
-                std::smatch matchpdf = *pdf;
-            my_link.push_back(matchpdf.str());
+                   matchpdf = *pdf;
+            my_pdf.push_back(matchpdf.str());
             }
     }
-// Iterar sobre o mapa e imprimir cada par chave-valor
+    std::cout << "Links:" << std::endl;
     for (const auto& pair : my_link) {
         std::cout << pair << std::endl;
     }
 
+    std::cout << "PDFs:" << std::endl;
+    for (const auto& pdf : my_pdf) {
+        std::cout << pdf << std::endl;
+    }
     return 0;
 }
