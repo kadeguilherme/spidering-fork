@@ -96,6 +96,7 @@ std::string TratarLink(const std::string& link) {
 }
 //Uma função que inicia threads para buscar links para arquivos PDF em paralelo.
 void BuscarPDFs(const std::vector<std::string>& links) {
+    std::string link_tradado_pdf;
     std::regex pdfRegex("href=\"([^\"]+\\.pdf)");
     std::vector<std::thread> threads;
 
@@ -109,7 +110,8 @@ void BuscarPDFs(const std::vector<std::string>& links) {
 
             for (const auto& pdf : pdf.result) {
                 std::cout << pdf << std::endl;
-                salvar_arquivos("pdf_links_do_principal.txt", {pdf});
+                std::string link_tratado_pdf = TratarLink(pdf);
+                salvar_arquivos("pdf_links_do_principal.txt", {link_tratado_pdf});
             }
         });
     }
