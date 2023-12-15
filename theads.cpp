@@ -4,16 +4,18 @@
 #include <vector>
 #include <regex>
 #include <thread>
-#include <mutex>
+#include <mutex> //é utilizado para garantir que apenas uma thread por vez tenha acesso a uma seção crítica do código
+#include <fstream>
 
 std::mutex coutMutex;
 
+//Essa função é utilizada como callback pelo libcurl para processar os dados recebidos durante o download.
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* response) {
     size_t total_size = size * nmemb;
     response->append(static_cast<char*>(contents), total_size);
     return total_size;
 }
-
+//Usa a biblioteca libcurl para realizar uma requisição HTTP à URL fornecida e retorna o HTML da página.
 std::string GetHtmlFromUrl(const std::string& url) {
     CURL* curl = curl_easy_init();
     if (!curl) {
@@ -40,13 +42,25 @@ std::string GetHtmlFromUrl(const std::string& url) {
 
     return result;
 }
-
+//Uma estrutura para armazenar dados que serão compartilhados entre threads.
 struct ThreadData {
     std::string html;
     std::regex regex;
     std::vector<std::string> result;
 };
-
+//Uma função que recebe um nome de arquivo e um vetor de strings e salva as strings no arquivo.
+void salvar_arquivos(const std::string& filename, const std::vector<std::string>& resultado) {
+    std::ofstream outputFile(filename, std::ios::app);  // Abre em modo de apêndice
+    if (outputFile.is_open()) {
+        for (const auto& item : resultado) {
+            outputFile << item << std::endl;
+        }
+        outputFile.close();
+    } else {
+        std::cerr << "Erro ao abrir o arquivo: " << filename << std::endl;
+    }
+}
+//Uma função que usa expressões regulares para extrair dados de uma string HTML e armazená-los na estrutura ThreadData.
 void thread_extrair(ThreadData* thread) {
     auto it = std::sregex_iterator(thread->html.begin(), thread->html.end(), thread->regex);
     auto end = std::sregex_iterator();
@@ -59,7 +73,7 @@ void thread_extrair(ThreadData* thread) {
         }
     }
 }
-
+//Remove partes desnecessárias de um link e adiciona o domínio se necessário.
 std::string TratarLink(const std::string& link) {
     std::string linkTratado = link;
 
@@ -80,7 +94,7 @@ std::string TratarLink(const std::string& link) {
 
     return linkTratado;
 }
-
+//Uma função que inicia threads para buscar links para arquivos PDF em paralelo.
 void BuscarPDFs(const std::vector<std::string>& links) {
     std::regex pdfRegex("href=\"([^\"]+\\.pdf)");
     std::vector<std::thread> threads;
@@ -93,8 +107,9 @@ void BuscarPDFs(const std::vector<std::string>& links) {
             ThreadData pdf{html, pdfRegex, {}};
             thread_extrair(&pdf);
 
-            for (const auto& pdfItem : pdf.result) {
-                std::cout << pdfItem << std::endl;
+            for (const auto& pdf : pdf.result) {
+                std::cout << pdf << std::endl;
+                salvar_arquivos("pdf_links_do_principal.txt", {pdf});
             }
         });
     }
@@ -104,17 +119,32 @@ void BuscarPDFs(const std::vector<std::string>& links) {
         thread.join();
     }
 }
-
+//função principal
 int main() {
     std::string url = "https://www.ifb.edu.br/";
     std::string html = GetHtmlFromUrl(url);
     std::regex hrefRegex("href=\"([^\"]+)\"");
+    std::regex pdf_linkRegex("href=\"([^\"]+\\.pdf)");
 
     ThreadData link{html, hrefRegex, {}};
     thread_extrair(&link);
 
-    for (const auto& linkItem : link.result) {
-        BuscarPDFs({linkItem});
+    ThreadData link_pdf{html, pdf_linkRegex, {}};
+    thread_extrair(&link_pdf);
+
+    for (const auto& link : link.result) {
+        std::cout << link << std::endl;
+        salvar_arquivos("links_principal.txt", {link});
     }
+
+    for (const auto& pdf : link_pdf.result) {
+        std::cout << pdf << std::endl;
+        salvar_arquivos("pdf_principal.txt", {pdf});
+    }
+
+    for (const auto& link : link.result) {
+        BuscarPDFs({link});
+    }
+
     return 0;
 }
